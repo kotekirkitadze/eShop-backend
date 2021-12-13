@@ -2,11 +2,19 @@ const express = require("express");
 const app = express();
 const morgan = require("morgan");
 const mongoose = require("mongoose");
+const cors = require("cors");
 
 require("dotenv/config");
 
+app.use(cors());
+app.options("*", cors);
 const api = process.env.API_URL;
+
+//route improts
 const productsRoute = require("./routers/products");
+const usersRoute = require("./routers/users");
+const ordersRoute = require("./routers/orders");
+const categoriesRoute = require("./routers/categories");
 
 //MiddleWare
 //ამ მიდლევეარით ვაანალიზებთ ფრონტენდიდან წამოსლ მონაცემებს, ვპარსავთ
@@ -18,6 +26,9 @@ app.use(morgan("tiny"));
 
 //Routers
 app.use(`${api}/products`, productsRoute);
+app.use(`${api}/users`, usersRoute);
+app.use(`${api}/category`, categoriesRoute);
+app.use(`${api}/orders`, ordersRoute);
 
 mongoose
 	.connect(process.env.CONNECTION_STRING)
