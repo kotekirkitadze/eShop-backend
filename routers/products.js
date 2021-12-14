@@ -2,15 +2,20 @@ const { Product } = require("../models/product");
 const { Category } = require("../models/category");
 const express = require("express");
 const router = express.Router();
-const mongoose = require("mongoose");
+// const mongoose = require("mongoose");
 
 router.get(`/`, async (req, res) => {
 	//this is to include only specific fields and exlude id,
 	//because without exluding the id, it will be returned
 	// const productList = await Product.find().select("name image -_id");
 
+	let filter = {};
+	if (req.query.categories) {
+		filter = { category: req.query.categories.split(",") };
+	}
+
 	//populating category with ref
-	const productList = await Product.find().populate("category");
+	const productList = await Product.find(filter).populate("category");
 	if (!productList) {
 		res.status(500).json({ success: false });
 	}
@@ -122,6 +127,39 @@ router.delete("/:id", async (req, res) => {
 	} catch (err) {
 		return res.status(400).json({ success: false, message: err });
 	}
+});
+
+router.get(`/get/count`, async (req, res) => {
+	Product.countDocuments()
+		.then((count) => {
+			if (count) {
+				return res.status(200).send({ productCount: count + "" });
+			} else {
+				return res.status(400).json({ success: fail, message: "Some error" });
+			}
+		})
+		.catch((err) => res.status(500).json({ message: err }));
+
+	// const productCount = await Product.countDocuments((count) => count);
+	// productCount += "";
+	// if (!productCount) {
+	// 	res.status(500).json({ success: false });
+	// }
+	// res.send(productCount);
+});
+
+router.get(`/get/featured/:count`, async (req, res) => {
+	let count = req.params.count ? req.params.count : 0;
+	Product.find({ isFeatured: true })
+		.limit(+count)
+		.then((featiredProducts) => {
+			if (featiredProducts) {
+				return res.status(200).send(featiredProducts);
+			} else {
+				return res.status(400).json({ success: fail, message: "Some error" });
+			}
+		})
+		.catch((err) => res.status(500).json({ message: err }));
 });
 
 module.exports = router;
