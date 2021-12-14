@@ -87,7 +87,7 @@ router.put("/:id", (req, res) => {
 			if (category) {
 				return res.status(200).send(category);
 			} else {
-				return res.status(400).send("The category can not be created");
+				return res.status(400).send("The category can not be updated");
 			}
 		})
 		.catch((err) => res.status(500).json({ success: false, message: err }));
