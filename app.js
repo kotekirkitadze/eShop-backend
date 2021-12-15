@@ -27,6 +27,7 @@ app.use(morgan("tiny"));
 
 //to protect apis
 app.use(authJwt());
+app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 app.use(errorHandler);
 
 //Routers

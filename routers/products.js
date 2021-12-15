@@ -2,8 +2,32 @@ const { Product } = require("../models/product");
 const { Category } = require("../models/category");
 const express = require("express");
 const router = express.Router();
-// const mongoose = require("mongoose");
-// var expressJwt = require("express-jwt");
+const multer = require("multer");
+const res = require("express/lib/response");
+const mongoose = require("mongoose");
+
+const FILE_TYPE_MAP = {
+	"image/png": "png",
+	"image/jpeg": "jpeg",
+	"image/jpg": "jpg",
+};
+
+const storage = multer.diskStorage({
+	destination: function (req, file, cb) {
+		const isValid = FILE_TYPE_MAP[file.mimetype];
+		let uploadError = new Error("Invalid image type");
+		if (isValid) {
+			uploadError = null;
+		}
+		cb(uploadError, "public/uploads");
+	},
+	filename: function (req, file, cb) {
+		const fileName = file.originalname.replace(" ", "-");
+		const extension = FILE_TYPE_MAP[file.mimetype];
+		cb(null, `${fileName}-${Date.now()}.${extension}`);
+	},
+});
+const uploadOptions = multer({ storage: storage });
 
 router.get(`/`, async (req, res) => {
 	//this is to include only specific fields and exlude id,
@@ -36,18 +60,24 @@ router.get("/:id", async (req, res) => {
 	}
 });
 
-router.post(`/`, async (req, res) => {
+router.post(`/`, uploadOptions.single("image"), async (req, res) => {
 	try {
 		let category = await Category.findById(req.body.category);
 		if (!category) return res.status(400).send("Invalid Category");
 	} catch (err) {
 		return res.status(500).json({ success: false, message: err });
 	}
+
+	const file = req.file;
+	if (!file) return res.status(400).send("No image in the request");
+
+	const filename = req.file.filename;
+	const basePath = `${req.protocol}://${req.get("host")}/public/upload/`;
 	const product = new Product({
 		name: req.body.name,
 		description: req.body.description,
 		richDescription: req.body.richDescription,
-		image: req.body.image,
+		image: `${basePath}${filename}`,
 		images: req.body.images,
 		brand: req.body.brand,
 		price: req.body.price,
@@ -70,7 +100,7 @@ router.post(`/`, async (req, res) => {
 	}
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", uploadOptions.single("image"), async (req, res) => {
 	//try catch - ში რომ გვქონდეს ფროდაქქთის დააფდეითება მაშინ შეგვიძლია
 	//ამის გამოყენების რეზალთი მივიღოთ, ახლა კი იქვე იჰენდლება ყველაფერი
 	//ტუტორიალშ ნოთ ვალიდ გამოიყენა და მგონი შეიცვალა მას შემდეგ რაღაცეები
@@ -84,13 +114,34 @@ router.put("/:id", async (req, res) => {
 		return res.status(500).json({ success: false, message: err });
 	}
 
+	let productFetched;
+	Product.findById(req.params.id)
+		.then((product) => {
+			if (!product) {
+				return res.status(400).send("Invalid Product");
+			}
+			productFetched = product;
+		})
+		.then((err) => res.status(500).json({ success: false, message: err }));
+
+	const file = req.file;
+	let imagePath;
+
+	if (file) {
+		const fileName = file.filename;
+		const basePath = `${req.protocol}://${req.get("host")}/public/uploads`;
+		imagePath = `${basePath}${fileName}`;
+	} else {
+		imagePath = productFetched?.image;
+	}
+
 	Product.findByIdAndUpdate(
 		req.params.id,
 		{
 			name: req.body.name,
 			description: req.body.description,
 			richDescription: req.body.richDescription,
-			image: req.body.image,
+			image: imagePath,
 			images: req.body.images,
 			brand: req.body.brand,
 			price: req.body.price,
@@ -103,9 +154,9 @@ router.put("/:id", async (req, res) => {
 		},
 		{ new: true }, //to get updated data, not old one
 	)
-		.then((product) => {
-			if (product) {
-				return res.status(200).send(product);
+		.then((updatedProduct) => {
+			if (updatedProduct) {
+				return res.status(200).send(updatedProduct);
 			} else {
 				return res.status(400).send("The product can not be updated");
 			}
@@ -162,5 +213,39 @@ router.get(`/get/featured/:count`, async (req, res) => {
 		})
 		.catch((err) => res.status(500).json({ message: err }));
 });
+
+router.put(
+	"/gallery-images/:id",
+	uploadOptions.array("images", 10),
+	async (req, res) => {
+		if (!mongoose.isValidObjectId(req.params.id)) {
+			return res.status(400).send("Invalid Product Id");
+		}
+		const files = req.files;
+		let imagesPath = [];
+		const basePath = `${req.protocol}://${req.get("host")}/public/upload/`;
+		if (files) {
+			files.map((file) => {
+				imagesPath.push(`${basePath}${file.filename}`);
+			});
+		}
+
+		Product.findByIdAndUpdate(
+			req.params.id,
+			{
+				images: imagesPath,
+			},
+			{ new: true },
+		)
+			.then((product) => {
+				if (product) {
+					return res.status(200).send(product);
+				} else {
+					return res.status(400).send("The product can not be updated");
+				}
+			})
+			.catch((err) => res.status(500).json({ success: false, message: err }));
+	},
+);
 
 module.exports = router;
