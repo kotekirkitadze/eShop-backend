@@ -33,7 +33,7 @@ app.use(errorHandler);
 //Routers
 app.use(`${api}/products`, productsRoute);
 app.use(`${api}/users`, usersRoute);
-app.use(`${api}/category`, categoriesRoute);
+app.use(`${api}/categories`, categoriesRoute);
 app.use(`${api}/orders`, ordersRoute);
 
 mongoose
