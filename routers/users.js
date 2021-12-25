@@ -120,26 +120,31 @@ router.put("/:id", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-	const user = await User.findOne({ email: req.body.email });
+	try {
+		const user = await User.findOne({ email: req.body.email });
+		// res.status(500).json({ success: false, message: err });
 
-	if (!user) {
-		return res.status(404).send("The user not found");
-	}
+		if (!user) {
+			return res.status(404).send("The user not found");
+		}
 
-	if (user && bcrypt.compareSync(req.body.password, user.passwordHash)) {
-		const secret = process.env.secret;
-		const token = jwt.sign(
-			{
-				userId: user.id,
-				isAdmin: user.isAdmin,
-			},
-			secret,
-			{ expiresIn: "1d" },
-		);
+		if (user && bcrypt.compareSync(req.body.password, user.passwordHash)) {
+			const secret = process.env.secret;
+			const token = jwt.sign(
+				{
+					userId: user.id,
+					isAdmin: user.isAdmin,
+				},
+				secret,
+				{ expiresIn: "1d" },
+			);
 
-		res.status(200).send({ email: user.email, token: token });
-	} else {
-		return res.status(404).send("Password is wrong!");
+			res.status(200).send({ email: user.email, token: token });
+		} else {
+			return res.status(404).send("Password is wrong!");
+		}
+	} catch (err) {
+		res.status(500).json({ succes: false, message: err });
 	}
 });
 

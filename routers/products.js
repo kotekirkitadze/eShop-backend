@@ -122,14 +122,14 @@ router.put("/:id", uploadOptions.single("image"), async (req, res) => {
 			}
 			productFetched = product;
 		})
-		.then((err) => res.status(500).json({ success: false, message: err }));
+		.catch((err) => res.status(500).json({ success: false, message: err }));
 
 	const file = req.file;
 	let imagePath;
 
 	if (file) {
 		const fileName = file.filename;
-		const basePath = `${req.protocol}://${req.get("host")}/public/uploads`;
+		const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
 		imagePath = `${basePath}${fileName}`;
 	} else {
 		imagePath = productFetched?.image;
