@@ -41,6 +41,8 @@ mongoose
 	.then(() => console.log("Database Connection is ready..."))
 	.catch((err) => console.log(err));
 
+const PORT = process.env.PORT || 3000;
+
 app.listen(3000, () => {
 	console.log("Server started on port: http://localhost:3000/");
 });
