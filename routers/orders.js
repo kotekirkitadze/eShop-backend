@@ -38,6 +38,29 @@ router.get("/:id", async (req, res) => {
 	}
 });
 
+router.get("/listOrders/:id", async (req, res) => {
+	try {
+		const orders = await Order.find().populate("orderItems");
+		// ({
+		// 	path: "user",
+		// 	// path: "orderItems",
+		// 	// populate: { path: "orderItems", populate: "product" },
+		// });
+
+		let requestedOrders = orders.filter(
+			(list) => list.user.toString() == req.params.id,
+		);
+		console.log(requestedOrders);
+
+		if (!requestedOrders) {
+			res.status(500).json({ success: fails });
+		}
+		res.send(requestedOrders);
+	} catch (err) {
+		return res.status(500).json({ success: false, message: err });
+	}
+});
+
 router.post("/", async (req, res) => {
 	const orderItemsIds = Promise.all(
 		req.body.orderItems.map(async (orderItem) => {
