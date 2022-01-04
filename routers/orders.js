@@ -121,7 +121,7 @@ router.post("/create-checkout-session", async (req, res) => {
 		payment_method_types: ["card"],
 		line_items: lineItems,
 		mode: "payment",
-		success_url: "https://kotekirkitadze.github.io/ngshop",
+		success_url: "http://localhost:4200/success",
 		cancel_url: "https://kotekirkitadze.github.io/ngshop",
 	});
 

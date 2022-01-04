@@ -12,13 +12,15 @@ function authJwt() {
 			{ url: /\/public\/uploads(.*)/, methods: ["GET", "OPTIONS"] },
 			{ url: /\/api\/v1\/products(.*)/, methods: ["GET", "OPTIONS"] },
 			{ url: /\/api\/v1\/categories(.*)/, methods: ["GET", "OPTIONS"] },
+			{ url: /\/api\/v1\/users(.*)/, methods: ["GET", "OPTIONS"] },
+			{ url: /\/api\/v1\/orders(.*)/, methods: ["POST", "OPTIONS"] },
 			`${api}/users/login`,
 			`${api}/users/register`,
+			`${api}/orders/create-checkout-session`,
 			// { url: /(.*)/ },
 		],
 	});
 }
-
 async function isRevoked(req, payload, done) {
 	if (!payload.isAdmin) {
 		done(null, true);
