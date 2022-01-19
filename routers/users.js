@@ -3,6 +3,30 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
+
+const FILE_TYPE_MAP = {
+	"image/png": "png",
+	"image/jpeg": "jpeg",
+	"image/jpg": "jpg",
+};
+
+const storage = multer.diskStorage({
+	destination: function (req, file, cb) {
+		const isValid = FILE_TYPE_MAP[file.mimetype];
+		let uploadError = new Error("Invalid image type");
+		if (isValid) {
+			uploadError = null;
+		}
+		cb(uploadError, "public/uploads");
+	},
+	filename: function (req, file, cb) {
+		const fileName = file.originalname.replace(" ", "-");
+		const extension = FILE_TYPE_MAP[file.mimetype];
+		cb(null, `${fileName}-${Date.now()}.${extension}`);
+	},
+});
+const uploadOptions = multer({ storage: storage });
 
 router.get("/", async (req, res) => {
 	const userList = await User.find().select("-passwordHash");
@@ -174,5 +198,50 @@ router.delete("/:id", async (req, res) => {
 		return res.status(400).json({ success: false, message: err });
 	}
 });
+
+router.put(
+	"/updateUserProfile/:id",
+	uploadOptions.single("image"),
+	async (req, res) => {
+		let userFetched;
+
+		User.findById(req.params.id)
+			.then((user) => {
+				if (!user) {
+					return res.status(400).send("Invalid Product");
+				}
+				userFetched = user;
+			})
+			.catch((err) => res.status(500).json({ success: false, message: err }));
+
+		const file = req.file;
+		let imagePath;
+
+		if (file) {
+			const fileName = file.filename;
+			const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
+			imagePath = `${basePath}${fileName}`;
+		} else {
+			imagePath = userFetched?.image;
+		}
+
+		User.findByIdAndUpdate(
+			req.params.id,
+			{
+				...userFetched,
+				image: imagePath,
+			},
+			{ new: true }, //to get updated data, not old one
+		)
+			.then((updatedUser) => {
+				if (updatedUser) {
+					return res.status(200).send(updatedUser);
+				} else {
+					return res.status(400).send("The user can not be updated");
+				}
+			})
+			.catch((err) => res.status(500).json({ success: false, message: err }));
+	},
+);
 
 module.exports = router;

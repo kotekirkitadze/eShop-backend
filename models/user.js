@@ -41,6 +41,10 @@ const userSchema = mongoose.Schema({
 		type: String,
 		default: "",
 	},
+	image: {
+		type: String,
+		default: "",
+	},
 });
 
 userSchema.virtual("id").get(function () {

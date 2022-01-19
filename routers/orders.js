@@ -40,7 +40,7 @@ router.get("/:id", async (req, res) => {
 
 router.get("/listOrders/:id", async (req, res) => {
 	try {
-		const orders = await Order.find().populate("orderItems");
+		const orders = await Order.find();
 		// ({
 		// 	path: "user",
 		// 	// path: "orderItems",
