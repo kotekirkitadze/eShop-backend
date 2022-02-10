@@ -9,12 +9,7 @@ const errorHandler = require("./helpers/error-handler");
 const http = require("http");
 const socketio = require("socket.io");
 
-// const io = require("socket.io")(httpServer, {
-// 	cors: {
-// 		origin: "https://example.com",
-// 		methods: ["GET", "POST"],
-// 	},
-// });
+const getSocket = require("./sockets/socket");
 
 app.use(cors());
 app.options("*", cors);
@@ -55,8 +50,7 @@ app.use(`${api}/orders`, ordersRoute);
 
 //io
 io.of(`${api}/chat`).on("connection", function (socket) {
-	console.log("hiii");
-	socket.emit("message", "hi Kote");
+	getSocket(socket);
 });
 
 mongoose
