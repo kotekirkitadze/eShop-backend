@@ -6,10 +6,27 @@ const cors = require("cors");
 require("dotenv/config");
 const authJwt = require("./helpers/jwt");
 const errorHandler = require("./helpers/error-handler");
+const http = require("http");
+const socketio = require("socket.io");
+
+// const io = require("socket.io")(httpServer, {
+// 	cors: {
+// 		origin: "https://example.com",
+// 		methods: ["GET", "POST"],
+// 	},
+// });
 
 app.use(cors());
 app.options("*", cors);
 const api = process.env.API_URL;
+
+const server = http.createServer(app);
+const io = socketio(server, {
+	cors: {
+		origin: "http://localhost:4200",
+		methods: ["GET", "POST"],
+	},
+});
 
 //route improts
 const productsRoute = require("./routers/products");
@@ -36,6 +53,12 @@ app.use(`${api}/users`, usersRoute);
 app.use(`${api}/categories`, categoriesRoute);
 app.use(`${api}/orders`, ordersRoute);
 
+//io
+io.of(`${api}/chat`).on("connection", function (socket) {
+	console.log("hiii");
+	socket.emit("message", "hi Kote");
+});
+
 mongoose
 	.connect(process.env.CONNECTION_STRING)
 	.then(() => console.log("Database Connection is ready..."))
@@ -43,6 +66,6 @@ mongoose
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
 	console.log("Server started on port: http://localhost:3000/");
 });
