@@ -12,6 +12,7 @@ const botName = "Chatcord Bot";
 function getSocket(socket, io) {
 	socket.on("joinRoom", ({ userId, room }) => {
 		const user = userJoin(socket.id, userId, room);
+		console.log(user.room, userId);
 		socket.join(user.room);
 		console.log(getRooms());
 		//socket.emit() single client
@@ -26,7 +27,7 @@ function getSocket(socket, io) {
 			.to(user.room)
 			.emit(
 				"message",
-				formatMessage(botName, `${user.username} has joined the chat`),
+				formatMessage(botName, `${user.userId} has joined the chat`),
 			);
 
 		//Send users and room info
@@ -41,9 +42,15 @@ function getSocket(socket, io) {
 
 	socket.on("chatMessage", (message) => {
 		const user = getCurrentUser(socket.id);
-		console.log(user, message);
-		io.to(user.room).emit("message", formatMessage(user.userId, message));
+		console.log(socket.id);
+		socket.to(user.room).emit("message", formatMessage(user.userId, message));
 	});
+
+	// socket.on("chatMessage", (message) => {
+	// 	const user = getCurrentUser(socket.id);
+	// 	console.log(user, message);
+	// 	socket.broadcast.emit("message", formatMessage(user.userId, message));
+	// });
 
 	//Runs when client disconnects the chat
 	socket.on("disconnect", () => {
