@@ -18,7 +18,7 @@ const api = process.env.API_URL;
 const server = http.createServer(app);
 const io = socketio(server, {
 	cors: {
-		origin: "http://localhost:4200",
+		origin: "*", // ["http://localhost:4200", "http://localhost:49240/"],
 		methods: ["GET", "POST"],
 	},
 });
@@ -50,7 +50,7 @@ app.use(`${api}/orders`, ordersRoute);
 
 //io
 io.of(`${api}/chat`).on("connection", function (socket) {
-	getSocket(socket);
+	getSocket(socket, io);
 });
 
 mongoose

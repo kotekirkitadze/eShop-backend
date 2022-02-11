@@ -1,5 +1,11 @@
 const users = [];
 
+//list of rooms
+
+function getRooms() {
+	return users;
+}
+
 //Join user to chat
 function userJoin(id, userId, room) {
 	const user = { id, userId, room };
@@ -31,4 +37,5 @@ module.exports = {
 	getCurrentUser,
 	userLeave,
 	getRoomUsers,
+	getRooms,
 };

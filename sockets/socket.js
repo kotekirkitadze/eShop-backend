@@ -4,15 +4,16 @@ const {
 	getCurrentUser,
 	userLeave,
 	getRoomUsers,
+	getRooms,
 } = require("./utils/users");
 
 const botName = "Chatcord Bot";
 
-function getSocket(socket) {
+function getSocket(socket, io) {
 	socket.on("joinRoom", ({ userId, room }) => {
 		const user = userJoin(socket.id, userId, room);
 		socket.join(user.room);
-
+		console.log(getRooms());
 		//socket.emit() single client
 		//Welcome current user
 		socket.emit("message", formatMessage(botName, "welcome chat app"));
@@ -33,12 +34,15 @@ function getSocket(socket) {
 			room: user.room,
 			users: getRoomUsers(user.room),
 		});
+
+		//broadcast list of rooms
+		socket.broadcast.emit("roomList", getRooms());
 	});
 
-	//Listen for chat message
 	socket.on("chatMessage", (message) => {
 		const user = getCurrentUser(socket.id);
-		io.to(user.room).emit("message", formatMessage(user.username, message));
+		console.log(user, message);
+		io.to(user.room).emit("message", formatMessage(user.userId, message));
 	});
 
 	//Runs when client disconnects the chat
