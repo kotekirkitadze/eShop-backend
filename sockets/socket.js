@@ -10,9 +10,8 @@ const {
 const botName = "Chatcord Bot";
 
 function getSocket(socket, io) {
-	socket.on("joinRoom", ({ userId, room }) => {
-		const user = userJoin(socket.id, userId, room);
-		console.log(user.room, userId);
+	socket.on("joinRoom", ({ userId, room, name, email, userImage }) => {
+		const user = userJoin(socket.id, userId, room, name, email, userImage);
 		socket.join(user.room);
 		console.log(getRooms());
 		//socket.emit() single client

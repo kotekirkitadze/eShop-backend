@@ -6,9 +6,10 @@ function getRooms() {
 	return users;
 }
 
+// socket.id, userId, room, name, email;
 //Join user to chat
-function userJoin(id, userId, room) {
-	const user = { id, userId, room };
+function userJoin(id, userId, room, name, email, userImage) {
+	const user = { id, userId, room, name, email, userImage };
 	users.push(user);
 	return user;
 }
