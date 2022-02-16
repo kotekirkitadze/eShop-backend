@@ -26,7 +26,7 @@ function getSocket(socket, io) {
 			.to(user.room)
 			.emit(
 				"message",
-				formatMessage(botName, `${user.userId} has joined the chat`),
+				formatMessage(botName, `${user.name} has joined the chat`),
 			);
 
 		//Send users and room info
@@ -42,7 +42,9 @@ function getSocket(socket, io) {
 	socket.on("chatMessage", (message) => {
 		const user = getCurrentUser(socket.id);
 		console.log(socket.id);
-		socket.to(user.room).emit("message", formatMessage(user.userId, message));
+		socket
+			.to(user.room)
+			.emit("message", formatMessage(user.userId, message, user.userImage));
 	});
 
 	// socket.on("chatMessage", (message) => {
