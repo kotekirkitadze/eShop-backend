@@ -158,11 +158,12 @@ router.post("/login", async (req, res) => {
 				{
 					userId: user.id,
 					isAdmin: user.isAdmin,
+					isSupport: user.isSupport,
 				},
 				secret,
 				{ expiresIn: "1d" },
 			);
-
+			console.log(token);
 			res.status(200).send({ email: user.email, token: token });
 		} else {
 			return res.status(404).send("Password is wrong!");
