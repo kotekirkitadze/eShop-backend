@@ -3,13 +3,13 @@ const users = [];
 //list of rooms
 
 function getRooms() {
-	return users;
+	return users.filter((user) => !user.isSupport);
 }
 
 // socket.id, userId, room, name, email;
 //Join user to chat
-function userJoin(id, userId, room, name, email, userImage) {
-	const user = { id, userId, room, name, email, userImage };
+function userJoin(id, userId, room, name, email, userImage, isSupport = false) {
+	const user = { id, userId, room, name, email, userImage, isSupport };
 	users.push(user);
 	return user;
 }
@@ -28,6 +28,13 @@ function userLeave(id) {
 	}
 }
 
+function notSupportUser(id) {
+	const index = users.findIndex((user) => user.userId == id);
+	if (index != -1) {
+		users.splice(index, 1)[0];
+	}
+}
+
 //Get room users
 function getRoomUsers(room) {
 	return users.filter((user) => user.room == room);
@@ -39,4 +46,5 @@ module.exports = {
 	userLeave,
 	getRoomUsers,
 	getRooms,
+	notSupportUser,
 };
