@@ -41,6 +41,9 @@ function getSocket(socket, io) {
 					formatMessage(botName, `${user.name} has joined the chat`),
 				);
 
+			socket.on("startWriting", (controller) => {
+				socket.broadcast.to(user.room).emit("startWriting", controller);
+			});
 			//Send users and room info
 			io.to(user.room).emit("roomUsers", {
 				room: user.room,

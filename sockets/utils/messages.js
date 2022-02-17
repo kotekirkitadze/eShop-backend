@@ -4,7 +4,7 @@ function formatMessage(username, text, image = "") {
 	return {
 		username,
 		text,
-		time: moment().format("h:mm a"),
+		time: new Date(), //moment().format("h:mm a"),
 		image,
 	};
 }
