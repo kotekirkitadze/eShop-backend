@@ -34,15 +34,22 @@ function getSocket(socket, io) {
 			// socket.broadcast.emit() - all the clinets who is connected but not who emits
 			//io.emit() - all the client in general
 
-			socket.broadcast
-				.to(user.room)
-				.emit(
-					"message",
-					formatMessage(botName, `${user.name} has joined the chat`),
-				);
+			socket.broadcast.to(user.room).emit(
+				"botMessage",
+				formatMessage(
+					botName,
+					{
+						text: `${user.name} has joined the chat`,
+						roomId: user.room,
+					},
+					user.userImage,
+				),
+			);
 
 			socket.on("startWriting", (controller) => {
-				socket.broadcast.to(user.room).emit("startWriting", controller);
+				socket.broadcast
+					.to(user.room)
+					.emit("startWriting", { controller: controller, roomId: user.room });
 			});
 			//Send users and room info
 			io.to(user.room).emit("roomUsers", {
@@ -97,10 +104,10 @@ function getSocket(socket, io) {
 					"message",
 					formatMessage(botName, `${user.name} has left the chat.`),
 				);
-			console.log("chawodebuli id", id);
 			notSupportUser(id);
 			//Send users and room info
 		}
+		console.log(getRooms());
 		socket.emit("roomList", getRooms());
 	});
 }
